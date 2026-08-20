@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 import { X, Sparkles } from "lucide-react"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import Image from "next/image"
 
 const popupVariants = cva(
@@ -53,7 +53,14 @@ export function NotificationPopup({ message, colorScheme, notificationId, imageU
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleDismiss()}>
-      <DialogContent className={cn(popupVariants({ colorScheme }), "max-w-lg border-0 p-0 gap-0")}>
+      <DialogContent
+        aria-describedby={undefined}
+        className={cn(
+          popupVariants({ colorScheme }),
+          "w-[calc(100vw-2rem)] max-w-lg max-h-[calc(100dvh-2rem)] overflow-y-auto border-0 p-0 gap-0"
+        )}
+      >
+        <DialogTitle className="sr-only">Notification</DialogTitle>
         {/* Decorative background pattern */}
         {!isWhiteTheme && (
           <div className="absolute inset-0 opacity-10">

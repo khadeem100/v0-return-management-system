@@ -26,9 +26,9 @@ export async function getBannerSettings() {
 export async function updateBannerSettings(prevState: any, formData: FormData) {
   const rawData = {
     message: formData.get("message"),
-    color_scheme: formData.get("color_scheme"),
-    display_type: formData.get("display_type"),
-    image_url: formData.get("image_url") || null,
+    color_scheme: formData.get("color_scheme") || "info",
+    display_type: formData.get("display_type") || "banner",
+    image_url: formData.get("image_url") || undefined,
     is_active: formData.get("is_active") === "true",
   }
 
@@ -49,5 +49,6 @@ export async function updateBannerSettings(prevState: any, formData: FormData) {
 
   // Revalidate all paths to show/hide the banner immediately
   revalidatePath("/", "layout")
+  revalidatePath("/admin/settings")
   return { success: true, error: null }
 }
