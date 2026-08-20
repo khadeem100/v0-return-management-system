@@ -86,13 +86,13 @@ function ReturnItemCard({ index, availableProducts, control, setValue, register,
     [selectedProductId, availableProducts]
   )
 
-  const hasVariations = useMemo(() => selectedProduct && selectedProduct.variations.length > 0, [selectedProduct])
+  const hasVariations = useMemo(() => Boolean(selectedProduct?.variations.length), [selectedProduct])
 
   const productAttributes = useMemo(() => {
     if (!selectedProduct || !hasVariations) return []
     const attributes = new Set<string>()
     selectedProduct.variations.forEach(v => {
-      Object.keys(v.attributes).forEach(attr => attributes.add(attr))
+      Object.keys(v.attributes ?? {}).forEach(attr => attributes.add(attr))
     })
     return Array.from(attributes)
   }, [selectedProduct, hasVariations])
@@ -150,11 +150,20 @@ function ReturnItemCard({ index, availableProducts, control, setValue, register,
         </div>
         <div className="space-y-2">
           <Label>Product *</Label>
-          <Select
+            <Select
+            value={selectedProductId || ""}
             onValueChange={(value) => {
-              setValue(`items.${index}.selectedProduct`, value)
+              const product = availableProducts.find((candidate) => candidate.id === value)
+              const attributes = product?.variations.flatMap((variation) => Object.keys(variation.attributes ?? {})) ?? []
+              const uniqueAttributes = new Set(attributes)
+
+              setValue(`items.${index}.selectedProduct`, value, { shouldValidate: true })
               setValue(`items.${index}.selectedAttributes`, {})
-              setValue(`items.${index}.productVariationId`, "")
+              setValue(
+                `items.${index}.productVariationId`,
+                uniqueAttributes.size === 0 && product?.variations.length === 1 ? product.variations[0].id : "",
+                { shouldValidate: true },
+              )
             }}
           >
             <SelectTrigger><SelectValue placeholder="Select Product" /></SelectTrigger>
@@ -233,7 +242,11 @@ export function ReturnForm({ availableProducts }: ReturnFormProps) {
   const returnSchema = useMemo(() => {
     const itemSchemaWithRefine = returnItemSchema.superRefine((data, ctx) => {
       const product = availableProducts.find(p => p.id === data.selectedProduct)
-      if (product && product.variations.length > 0 && !data.productVariationId) {
+      const hasSelectableVariationAttributes = product?.variations.some((variation) =>
+        Object.keys(variation.attributes ?? {}).length > 0,
+      )
+
+      if (hasSelectableVariationAttributes && !data.productVariationId) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           path: ["productVariationId"],
