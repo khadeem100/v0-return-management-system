@@ -32,6 +32,15 @@ export function BannerSettingsForm({ initialSettings }: BannerSettingsFormProps)
   const [imageUrl, setImageUrl] = useState<string | null>(initialSettings?.image_url || null)
   const [isUploading, setIsUploading] = useState(false)
   const [displayType, setDisplayType] = useState(initialSettings?.display_type || "banner")
+  const [colorScheme, setColorScheme] = useState(initialSettings?.color_scheme || "info")
+  const [isActive, setIsActive] = useState(initialSettings?.is_active || false)
+
+  const handleDisplayTypeChange = (value: string) => {
+    setDisplayType(value)
+    if (value === "banner" && colorScheme === "white") {
+      setColorScheme("info")
+    }
+  }
 
   // Cast the error state to allow accessing arbitrary keys like _form
   const errors = state.error as Record<string, string[] | undefined> | null
@@ -90,10 +99,10 @@ export function BannerSettingsForm({ initialSettings }: BannerSettingsFormProps)
       </div>
       <div className="space-y-2">
         <Label htmlFor="display_type">Display Type</Label>
+        <input type="hidden" name="display_type" value={displayType} />
         <Select
-          name="display_type"
-          defaultValue={initialSettings?.display_type || "banner"}
-          onValueChange={setDisplayType}
+          value={displayType}
+          onValueChange={handleDisplayTypeChange}
         >
           <SelectTrigger>
             <SelectValue />
@@ -109,7 +118,8 @@ export function BannerSettingsForm({ initialSettings }: BannerSettingsFormProps)
       </div>
       <div className="space-y-2">
         <Label htmlFor="color_scheme">Color Scheme</Label>
-        <Select name="color_scheme" defaultValue={initialSettings?.color_scheme || "info"}>
+        <input type="hidden" name="color_scheme" value={colorScheme} />
+        <Select value={colorScheme} onValueChange={setColorScheme}>
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
@@ -191,11 +201,11 @@ export function BannerSettingsForm({ initialSettings }: BannerSettingsFormProps)
             Turn this on to show the notification to all visitors.
           </p>
         </div>
+        <input type="hidden" name="is_active" value={String(isActive)} />
         <Switch
           id="is_active"
-          name="is_active"
-          value="true"
-          defaultChecked={initialSettings?.is_active || false}
+          checked={isActive}
+          onCheckedChange={setIsActive}
         />
       </div>
       <SubmitButton isUploading={isUploading} />
